@@ -14,13 +14,18 @@ export default function RootLayout() {
           animation: "slide_from_right",
         }}
       >
+        {}
+        <Stack.Screen name="index" />
+        <Stack.Screen name="cadastro" />
+
+        {}
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen 
-          name="produto/novo" 
-          options={{ 
+        <Stack.Screen
+          name="produto/novo"
+          options={{
             presentation: "modal",
             animation: "slide_from_bottom",
-          }} 
+          }}
         />
       </Stack>
     </SafeAreaProvider>

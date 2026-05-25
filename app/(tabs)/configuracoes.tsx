@@ -146,7 +146,7 @@ export default function ConfiguracoesScreen() {
           </View>
         </Section>
 
-        {/* Zona de Perigo */}
+        {}
         <Section title="Zona de Perigo" titleColor="text-red-500/70">
           <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
             <TouchableOpacity className="flex-row items-center gap-3 p-4" activeOpacity={0.7}>

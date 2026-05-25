@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import axios from 'axios';
 
 export default function NovoProdutoScreen() {
   const insets = useSafeAreaInsets();
+  
+  // Lê os dados se viermos do botão do Lápis
+  const params = useLocalSearchParams();
+  const isEditing = !!params.id; // Descobre se é modo edição
 
-  const [nome, setNome] = useState('');
-  const [preco, setPreco] = useState('');
-  const [quantidade, setQuantidade] = useState('');
-  const [categoria, setCategoria] = useState(''); // <-- Estado da categoria adicionado
+  // Se for edição, já preenche os campos automaticamente!
+  const [nome, setNome] = useState(params.nome ? String(params.nome) : '');
+  const [preco, setPreco] = useState(params.preco ? String(params.preco) : '');
+  const [quantidade, setQuantidade] = useState(params.quantidade ? String(params.quantidade) : '');
   const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const salvarProdutoBackend = async () => {
-    if (!nome || !preco || !quantidade || !categoria) {
-      Alert.alert("Validação", "Preencha todos os campos, incluindo a categoria!");
+    if (!nome || !preco || !quantidade) {
+      Alert.alert("Validação", "Preencha todos os campos!");
       return;
     }
 
@@ -27,31 +31,27 @@ export default function NovoProdutoScreen() {
         nome: nome,
         quantidade: parseInt(quantidade),
         preco: parseFloat(preco.replace(',', '.')),
-        categoria: categoria // <-- Enviando a categoria para o Java
       };
 
-      // URL atualizada com o IP real que apareceu no seu terminal
-      const resposta = await axios.post('http://192.168.255.104:8080/produtos', produtoParaSalvar, {
-          timeout: 5000 
-      });
+      const API_URL = 'http://192.168.0.101:8080/produtos';
+
+      let resposta;
+      if (isEditing) {
+        // Se for edição, faz um PUT mandando o ID na URL
+        resposta = await axios.put(`${API_URL}/${params.id}`, produtoParaSalvar);
+      } else {
+        // Se for produto novo, faz um POST normal
+        resposta = await axios.post(API_URL, produtoParaSalvar);
+      }
 
       if (resposta.status === 200 || resposta.status === 201) {
-        Alert.alert("Sucesso", "Produto cadastrado com sucesso.");
-        router.back();
-      } else {
-          Alert.alert("Aviso", `O servidor respondeu com status: ${resposta.status}`);
+        Alert.alert("Sucesso", isEditing ? "Produto atualizado!" : "Produto cadastrado!");
+        router.replace('/vendas'); 
       }
 
     } catch (error) {
-        let errorMessage = "Não foi possível conectar ao servidor.";
-        if (axios.isAxiosError(error)) {
-            errorMessage = error.message;
-            if (error.response) {
-                errorMessage = `Erro do servidor: ${error.response.status} - ${JSON.stringify(error.response.data)}`;
-            }
-        }
-      Alert.alert("Erro de Conexão", errorMessage);
-      console.error("Erro Axios:", error);
+      Alert.alert("Erro ao Salvar", "Ocorreu um erro ao conectar com o banco.");
+      console.log(error);
     } finally {
         setIsSubmitting(false);
     }
@@ -68,7 +68,10 @@ export default function NovoProdutoScreen() {
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text className="text-2xl font-bold text-white">Novo Produto</Text>
+            {/* O Título muda sozinho! */}
+            <Text className="text-2xl font-bold text-white">
+              {isEditing ? "Editar Produto" : "Novo Produto"}
+            </Text>
           </View>
         </View>
       </View>
@@ -102,18 +105,6 @@ export default function NovoProdutoScreen() {
           </View>
         </View>
 
-        {}
-        <View className="mb-4">
-          <Text className="text-sm text-gray-400 mb-2">Categoria</Text>
-          <TextInput
-            value={categoria}
-            onChangeText={setCategoria}
-            placeholder="Ex: Eletrônicos, Roupas..."
-            placeholderTextColor="#4b5563"
-            className="w-full bg-zinc-900 text-white rounded-xl px-4 py-4 text-sm"
-          />
-        </View>
-
         <View className="mb-4">
           <Text className="text-sm text-gray-400 mb-2">Quantidade em Estoque</Text>
           <TextInput
@@ -135,7 +126,9 @@ export default function NovoProdutoScreen() {
           {isSubmitting ? (
               <ActivityIndicator color="#000" />
           ) : (
-              <Text className="text-black font-bold text-lg">Salvar Produto</Text>
+              <Text className="text-black font-bold text-lg">
+                {isEditing ? "Salvar Alterações" : "Salvar Produto"}
+              </Text>
           )}
         </TouchableOpacity>
 
