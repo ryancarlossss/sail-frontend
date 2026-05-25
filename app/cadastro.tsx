@@ -21,8 +21,8 @@ export default function CadastroScreen() {
     setIsLoading(true);
 
     try {
-      
-      const resposta = await axios.post('http://192.168.0.101:8080/usuarios/cadastrar', {
+      // Faz o POST pra sua rota de cadastro no Java
+      const resposta = await axios.post('http://10.178.215.156:8080/usuarios/cadastrar', {
         nome: nome,
         email: email,
         senha: senha

@@ -6,7 +6,7 @@ import { SummaryCards } from "@/components/SummaryCards";
 import { ProductList, type Product } from "@/components/ProductList";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 
-const API_URL = "http://192.168.0.101:8080/produtos";
+const API_URL = "http://10.178.215.156:8080/produtos";
 
 export default function VendasScreen() {
   const [products, setProducts] = useState<Product[]>([]);

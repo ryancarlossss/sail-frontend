@@ -20,7 +20,7 @@ export default function LoginScreen() {
 
     try {
       
-      const resposta = await axios.post('http://192.168.0.101:8080/usuarios/login', {
+      const resposta = await axios.post('http://10.178.215.156:8080/usuarios/login', {
         email: email,
         senha: senha
       });

@@ -33,7 +33,7 @@ export default function NovoProdutoScreen() {
         preco: parseFloat(preco.replace(',', '.')),
       };
 
-      const API_URL = 'http://192.168.0.101:8080/produtos';
+      const API_URL = 'http://10.178.215.156:8080/produtos';
 
       let resposta;
       if (isEditing) {
