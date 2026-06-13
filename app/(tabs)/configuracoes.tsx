@@ -1,69 +1,127 @@
-import { useState } from "react";
-import { ScrollView, View, Text, TouchableOpacity } from "react-native";
-import { Link, router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { ScrollView, View, Text, TouchableOpacity, Switch } from "react-native";
+import { router } from "expo-router";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Switch, ListItem, ToggleItem } from "@/components/ui/ListItem";
+import { useColorScheme } from "nativewind";
 
 export default function ConfiguracoesScreen() {
   const insets = useSafeAreaInsets();
-  const [darkMode, setDarkMode] = useState(true);
+  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
+
   const [novosPedidos, setNovosPedidos] = useState(true);
   const [estoqueBaixo, setEstoqueBaixo] = useState(true);
   const [mensagensClientes, setMensagensClientes] = useState(false);
   const [resumoDiario, setResumoDiario] = useState(true);
   const [fontSize, setFontSize] = useState(1);
 
+  const primaryColor = isDark ? "#5BE096" : "#2E8B57";
+  const iconColor = isDark ? "#5BE096" : "#2E8B57";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const subtextColor = isDark ? "text-gray-400" : "text-gray-500";
+  const cardBg = isDark ? "bg-zinc-900" : "bg-white";
+  const divider = isDark ? "border-zinc-800" : "border-gray-100";
+  const btnBg = isDark ? "bg-zinc-900" : "bg-gray-100";
+
+  const renderItem = (icon: any, title: string, subtitle?: string, rightElement?: React.ReactNode, isDanger?: boolean, onPress?: () => void) => (
+    <TouchableOpacity
+      activeOpacity={onPress ? 0.7 : 1}
+      onPress={onPress}
+      className={`flex-row items-center justify-between p-4 border-b ${divider}`}
+    >
+      <View className="flex-row items-center gap-3 flex-1">
+        <Ionicons name={icon} size={22} color={isDanger ? "#ef4444" : iconColor} />
+        <View className="flex-1">
+          <Text className={`${isDanger ? "text-red-500 font-medium" : textColor} text-base`}>{title}</Text>
+          {subtitle && <Text className={`${subtextColor} text-xs mt-0.5`}>{subtitle}</Text>}
+        </View>
+      </View>
+      {rightElement ? rightElement : !isDanger && <Feather name="chevron-right" size={20} color={isDark ? "#52525b" : "#d1d5db"} />}
+    </TouchableOpacity>
+  );
+
+  const renderToggle = (icon: any, title: string, subtitle: string, value: boolean, onValueChange: () => void) => (
+    <View className={`flex-row items-center justify-between p-4 border-b ${divider}`}>
+      <View className="flex-row items-center gap-3 flex-1">
+        <Ionicons name={icon} size={22} color={iconColor} />
+        <View className="flex-1 pr-4">
+          <Text className={`${textColor} text-base`}>{title}</Text>
+          <Text className={`${subtextColor} text-xs mt-0.5`}>{subtitle}</Text>
+        </View>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: isDark ? "#3f3f46" : "#e5e7eb", true: primaryColor }}
+        thumbColor="#ffffff"
+      />
+    </View>
+  );
+
   return (
-    <View className="flex-1 bg-[#09090b]">
-      {/* Header */}
-      <View style={{ paddingTop: insets.top }} className="bg-[#09090b] border-b border-zinc-800">
-        <View className="flex-row items-center px-4 py-4">
+    <View className="flex-1 bg-[#F5FBF7] dark:bg-black">
+      <View style={{ paddingTop: insets.top }} className={`px-4 pb-2 pt-4 bg-[#F5FBF7] dark:bg-black`}>
+        <View className="flex-row items-center justify-between mb-6">
           <TouchableOpacity
             onPress={() => router.back()}
-            className="p-2 -ml-2 rounded-full"
-            activeOpacity={0.7}
+            className={`w-10 h-10 items-center justify-center rounded-xl ${btnBg}`}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Feather name="arrow-left" size={20} color={iconColor} />
           </TouchableOpacity>
-          <Text className="flex-1 text-center text-lg font-semibold text-white pr-8">
-            Configuracoes
-          </Text>
+
+          <Text className={`text-3xl font-bold italic ${isDark ? "text-[#5BE096]" : "text-[#2E8B57]"}`}>Sail.</Text>
+
+          <View className="flex-row gap-2">
+            <TouchableOpacity className={`w-10 h-10 items-center justify-center rounded-xl ${btnBg}`}>
+              <Feather name="eye" size={18} color={isDark ? "#fff" : "#000"} />
+            </TouchableOpacity>
+            <TouchableOpacity className={`w-10 h-10 items-center justify-center rounded-xl ${isDark ? "bg-[#5BE096]/20" : "bg-[#2E8B57]"}`}>
+              <Feather name="settings" size={18} color={isDark ? "#5BE096" : "#fff"} />
+            </TouchableOpacity>
+            <TouchableOpacity className={`w-10 h-10 items-center justify-center rounded-xl relative ${btnBg}`}>
+              <Feather name="bell" size={18} color={isDark ? "#fff" : "#000"} />
+              <View className="absolute top-2 right-2 w-2 h-2 bg-[#5BE096] rounded-full" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="items-center mb-2">
+          <Text className={`text-2xl font-bold ${textColor}`}>Configurações</Text>
+          <Text className={`${subtextColor} text-sm mt-1 text-center`}>Gerencie notificações, segurança e preferências do app</Text>
         </View>
       </View>
 
-      <ScrollView className="flex-1 px-4 py-6" showsVerticalScrollIndicator={false}>
-        {/* Aparencia e Acessibilidade */}
-        <Section title="Aparencia e Acessibilidade">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <View className="flex-row items-center justify-between p-4">
-              <View className="flex-row items-center gap-3">
-                <Ionicons name={darkMode ? "moon" : "sunny"} size={20} color="#5BE096" />
-                <Text className="text-white">Tema do Aplicativo</Text>
-              </View>
-              <Switch enabled={darkMode} onToggle={() => setDarkMode(!darkMode)} />
-            </View>
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
 
-            <View className="p-4">
-              <View className="flex-row items-center gap-3 mb-3">
-                <Ionicons name="text" size={20} color="#5BE096" />
-                <Text className="text-white">Tamanho do Texto</Text>
+        <View className="mt-6 mb-6">
+          <Text className={`text-xs font-bold uppercase tracking-wider mb-3 px-1 ${isDark ? "text-green-500" : "text-green-700"}`}>Aparência e Acessibilidade</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderToggle(
+              isDark ? "moon" : "sunny",
+              "Tema do Aplicativo",
+              isDark ? "Você está no modo escuro" : "Você está no modo claro",
+              isDark,
+              toggleColorScheme
+            )}
+
+            <View className={`p-4 border-b ${divider}`}>
+              <View className="flex-row items-center gap-3 mb-4">
+                <Ionicons name="text" size={22} color={iconColor} />
+                <View>
+                  <Text className={`${textColor} text-base`}>Tamanho do Texto</Text>
+                  <Text className={`${subtextColor} text-xs mt-0.5`}>Ajuste o tamanho do texto do aplicativo</Text>
+                </View>
               </View>
-              <View className="flex-row items-center justify-center gap-2">
+              <View className="flex-row items-center gap-2">
                 {[0, 1, 2].map((size) => (
                   <TouchableOpacity
                     key={size}
                     onPress={() => setFontSize(size)}
-                    className={`px-4 py-2 rounded-lg ${
-                      fontSize === size ? "bg-primary" : "bg-zinc-800"
-                    }`}
+                    className={`flex-1 py-3 rounded-xl border ${fontSize === size ? `border-[${primaryColor}]` : divider} ${fontSize === size ? (isDark ? 'bg-zinc-800' : 'bg-green-50') : btnBg} items-center`}
                     activeOpacity={0.7}
                   >
-                    <Text
-                      className={`font-medium ${
-                        fontSize === size ? "text-primary-dark" : "text-gray-400"
-                      } ${size === 0 ? "text-sm" : size === 2 ? "text-lg" : "text-base"}`}
-                    >
+                    <Text className={`font-bold ${fontSize === size ? (isDark ? "text-[#5BE096]" : "text-[#2E8B57]") : subtextColor} ${size === 0 ? "text-sm" : size === 2 ? "text-lg" : "text-base"}`}>
                       A{size === 0 ? "-" : size === 2 ? "+" : ""}
                     </Text>
                   </TouchableOpacity>
@@ -71,116 +129,67 @@ export default function ConfiguracoesScreen() {
               </View>
             </View>
 
-            <ListItem
-              icon="language"
-              label="Fonte do Sistema"
-              rightElement={
-                <View className="bg-zinc-800 px-3 py-2 rounded-lg">
-                  <Text className="text-white text-sm">Padrao</Text>
-                </View>
-              }
-              showChevron={false}
-            />
+            {renderItem("language", "Fonte do Sistema", "Define a fonte padrão do aplicativo",
+              <View className={`px-3 py-1.5 rounded-lg flex-row items-center ${isDark ? "bg-zinc-800" : "bg-gray-100"}`}>
+                <Text className={`${subtextColor} text-sm mr-2`}>Padrão</Text>
+                <Feather name="chevron-right" size={14} color={isDark ? "#9ca3af" : "#6b7280"} />
+              </View>
+            )}
           </View>
-        </Section>
+        </View>
 
-        {/* Gerenciamento da Loja */}
-        <Section title="Gerenciamento da Loja">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <ListItem icon="business" label="Informacoes do Negocio" subtitle="CNPJ, Nome da Loja, Endereco" />
-            <ListItem icon="card" label="Metodos de Pagamento" subtitle="PIX, Cartao, Maquininha" />
-            <ListItem icon="receipt" label="Taxas e Impostos" subtitle="Configurar tributacao" />
-            <ListItem icon="car" label="Opcoes de Frete/Entrega" subtitle="Taxas e integracoes" />
+        <View className="mb-6">
+          <Text className={`text-xs font-bold uppercase tracking-wider mb-3 px-1 ${isDark ? "text-green-500" : "text-green-700"}`}>Gerenciamento da Loja</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderItem("business", "Informações do Negócio", "CNPJ, Nome da Loja, Endereço")}
+            {renderItem("card", "Métodos de Pagamento", "PIX, Cartão, Maquininha")}
+            {renderItem("receipt", "Taxas e Impostos", "Configurar tributação")}
+            {renderItem("car", "Opções de Frete/Entrega", "Taxas e integrações")}
           </View>
-        </Section>
+        </View>
 
-        {/* Notificacoes */}
-        <Section title="Notificacoes">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <ToggleItem
-              icon="notifications"
-              label="Novos Pedidos"
-              enabled={novosPedidos}
-              onToggle={() => setNovosPedidos(!novosPedidos)}
-            />
-            <ToggleItem
-              icon="cube"
-              label="Estoque Baixo"
-              enabled={estoqueBaixo}
-              onToggle={() => setEstoqueBaixo(!estoqueBaixo)}
-            />
-            <ToggleItem
-              icon="chatbubble"
-              label="Mensagens de Clientes"
-              enabled={mensagensClientes}
-              onToggle={() => setMensagensClientes(!mensagensClientes)}
-            />
-            <ToggleItem
-              icon="bar-chart"
-              label="Resumo de Vendas Diario"
-              enabled={resumoDiario}
-              onToggle={() => setResumoDiario(!resumoDiario)}
-            />
+        <View className="mb-6">
+          <Text className={`text-xs font-bold uppercase tracking-wider mb-3 px-1 ${isDark ? "text-green-500" : "text-green-700"}`}>Notificações</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderToggle("notifications", "Novos Pedidos", "Receba notificações de novos pedidos", novosPedidos, () => setNovosPedidos(!novosPedidos))}
+            {renderToggle("cube", "Estoque Baixo", "Seja avisado quando o estoque estiver baixo", estoqueBaixo, () => setEstoqueBaixo(!estoqueBaixo))}
+            {renderToggle("chatbubble", "Mensagens de Clientes", "Receba mensagens e interações de clientes", mensagensClientes, () => setMensagensClientes(!mensagensClientes))}
+            {renderToggle("bar-chart", "Resumo de Vendas Diário", "Receba o resumo diário de vendas", resumoDiario, () => setResumoDiario(!resumoDiario))}
           </View>
-        </Section>
+        </View>
 
-        {/* Conta e Seguranca */}
-        <Section title="Conta e Seguranca">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <ListItem icon="lock-closed" label="Alterar Senha" />
-            <ListItem icon="shield-checkmark" label="Autenticacao em Dois Fatores (2FA)" />
-            <ListItem icon="phone-portrait" label="Gerenciar Dispositivos Conectados" />
+        <View className="mb-6">
+          <Text className={`text-xs font-bold uppercase tracking-wider mb-3 px-1 ${isDark ? "text-green-500" : "text-green-700"}`}>Conta e Segurança</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderItem("lock-closed", "Alterar Senha", "Mantenha sua conta segura")}
+            {renderItem("shield-checkmark", "Autenticação em Dois Fatores (2FA)", "Mais segurança para sua conta")}
+            {renderItem("phone-portrait", "Gerenciar Dispositivos Conectados", "Veja e gerencie dispositivos conectados")}
           </View>
-        </Section>
+        </View>
 
-        {/* Suporte e Sobre */}
-        <Section title="Suporte e Sobre">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <ListItem icon="help-circle" label="Central de Ajuda / FAQ" />
-            <ListItem icon="chatbubbles" label="Falar com o Suporte" subtitle="WhatsApp" />
-            <ListItem icon="document-text" label="Termos de Uso e Privacidade" />
-            <View className="p-4 flex-row items-center justify-between">
-              <Text className="text-gray-500 text-sm">Versao do App</Text>
-              <Text className="text-gray-600 text-sm">v1.0.4</Text>
+        <View className="mb-6">
+          <Text className={`text-xs font-bold uppercase tracking-wider mb-3 px-1 ${isDark ? "text-green-500" : "text-green-700"}`}>Suporte e Sobre</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderItem("help-circle", "Central de Ajuda / FAQ", "Tire suas dúvidas")}
+            {renderItem("logo-whatsapp", "Falar com o Suporte", "Converse com nossa equipe via WhatsApp")}
+            {renderItem("document-text", "Termos de Uso e Privacidade", "Leia nossos termos e políticas")}
+            <View className={`p-4 flex-row items-center justify-between border-b ${divider}`}>
+              <Text className={`${subtextColor} text-sm`}>Versão do App</Text>
+              <Text className={`${subtextColor} text-sm`}>v1.0.4</Text>
             </View>
           </View>
-        </Section>
+        </View>
 
-        {}
-        <Section title="Zona de Perigo" titleColor="text-red-500/70">
-          <View className="bg-surface-light rounded-xl overflow-hidden divide-y divide-zinc-800">
-            <TouchableOpacity className="flex-row items-center gap-3 p-4" activeOpacity={0.7}>
-              <Ionicons name="log-out" size={20} color="#ef4444" />
-              <Text className="text-red-500 font-medium">Sair da Conta</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center gap-3 p-4" activeOpacity={0.7}>
-              <Ionicons name="trash" size={20} color="#f87171" />
-              <Text className="text-red-400/70 text-sm">Excluir Conta</Text>
-            </TouchableOpacity>
+        <View className="mb-8">
+          <Text className="text-xs font-bold uppercase tracking-wider mb-3 px-1 text-red-500/80">Zona de Perigo</Text>
+          <View className={`${cardBg} rounded-2xl overflow-hidden border ${divider}`}>
+            {renderItem("log-out", "Sair da Conta", undefined, undefined, true)}
+            {renderItem("trash", "Excluir Conta", undefined, undefined, true)}
           </View>
-        </Section>
+        </View>
 
-        <View className="h-8" />
+        <View className="h-10" />
       </ScrollView>
-    </View>
-  );
-}
-
-function Section({
-  title,
-  titleColor = "text-gray-500",
-  children,
-}: {
-  title: string;
-  titleColor?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View className="mb-6">
-      <Text className={`text-xs font-medium uppercase tracking-wider mb-3 px-1 ${titleColor}`}>
-        {title}
-      </Text>
-      {children}
     </View>
   );
 }
