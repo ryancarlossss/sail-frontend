@@ -92,7 +92,7 @@ export default function ConfiguracoesScreen() {
             </View>
           </View>
 
-          {/* TEXTO DE CONFIGURAÇÕES CORRIGIDO (Verde Forte e Maior) */}
+          {}
           <View className="items-center mb-2">
             <Text className={`text-3xl font-bold ${isDark ? "text-[#5BE096]" : "text-[#2E8B57]"}`}>Configurações</Text>
             <Text className={`${subtextColor} text-sm mt-1 text-center`}>Gerencie notificações, segurança e preferências do app</Text>

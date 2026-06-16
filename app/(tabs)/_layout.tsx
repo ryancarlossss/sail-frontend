@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "nativewind"; // <-- Importamos para a barra mudar de cor
+import { useColorScheme } from "nativewind"; 
 
 type TabIconProps = {
   name: keyof typeof Ionicons.glyphMap;
@@ -10,7 +10,7 @@ type TabIconProps = {
 };
 
 function TabIcon({ name, color, focused }: TabIconProps) {
-  // Ajustei o tracinho verde em cima do ícone para respeitar a cor do tema
+  
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -32,11 +32,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: isDark ? "#5BE096" : "#2E8B57", // Cor dinâmica
+        tabBarActiveTintColor: isDark ? "#5BE096" : "#2E8B57", 
         tabBarInactiveTintColor: isDark ? "#6b7280" : "#9CA3AF",
         tabBarStyle: {
-          backgroundColor: isDark ? "#000000" : "#ffffff", // Fundo da barra dinâmico
-          borderTopColor: isDark ? "#1a1a1a" : "#e5e7eb", // Linha de cima dinâmica
+          backgroundColor: isDark ? "#000000" : "#ffffff", 
+          borderTopColor: isDark ? "#1a1a1a" : "#e5e7eb", 
           borderTopWidth: 1,
           height: 60,
           paddingBottom: 8,
@@ -78,7 +78,7 @@ export default function TabLayout() {
         }}
       />
 
-      {/* NOVA TELA DE PERFIL ADICIONADA AQUI */}
+      {}
       <Tabs.Screen
         name="perfil"
         options={{
