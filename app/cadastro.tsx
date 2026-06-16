@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 import axios from 'axios';
 
 export default function CadastroScreen() {
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCadastro = async () => {
@@ -21,86 +27,100 @@ export default function CadastroScreen() {
     setIsLoading(true);
 
     try {
-      // Faz o POST pra sua rota de cadastro no Java
-      const resposta = await axios.post('http://10.178.215.156:8080/usuarios/cadastrar', {
+      const API_URL = 'http://192.168.0.104:8080/usuarios/cadastrar';
+      
+      const resposta = await axios.post(API_URL, {
         nome: nome,
         email: email,
         senha: senha
+      }, {
+        timeout: 10000 
       });
 
-      if (resposta.status === 200 || resposta.status === 201) {
-        Alert.alert('Sucesso', 'Conta criada com sucesso! Faça seu login.');
-        // Volta pra tela de Login
+      if (resposta.status === 201 || resposta.status === 200) {
+        Alert.alert('Sucesso', 'Conta criada com sucesso!');
         router.back();
       }
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível criar a conta. Tente outro e-mail.');
-      console.error(error);
+      if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
+        Alert.alert('Erro de Rede', 'Tempo de conexão esgotado. Verifique se o Java está rodando no IP correto.');
+      } else {
+        Alert.alert('Erro no Cadastro', 'Verifique o e-mail ou a conexão.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <View className="flex-1 bg-black px-6" style={{ paddingTop: insets.top + 20 }}>
-      <TouchableOpacity
-        onPress={() => router.back()}
-        className="p-2 -ml-2 mb-6 rounded-full w-12 h-12 items-center justify-center bg-zinc-900"
-      >
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+    <BackgroundWrapper>
+      <View className="flex-1 px-6" style={{ paddingTop: insets.top + 20 }}>
 
-      <Text className="text-3xl font-bold text-white mb-2">Criar Conta</Text>
-      <Text className="text-gray-400 text-base mb-8">Preencha seus dados para começar</Text>
+        <View className="flex-row items-center justify-between mb-6">
+          <TouchableOpacity onPress={() => router.back()} className="w-12 h-12 items-center justify-center rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-transparent">
+            <Feather name="arrow-left" size={24} color={isDark ? "#5BE096" : "#2E8B57"} />
+          </TouchableOpacity>
+          <Text className={`text-3xl font-bold italic absolute w-full text-center -z-10 ${isDark ? "text-[#5BE096]" : "text-[#2E8B57]"}`}>Sail.</Text>
+          <View className="w-12" />
+        </View>
 
-      <View className="mb-4">
-        <Text className="text-sm text-gray-400 mb-2">Nome Completo</Text>
-        <TextInput
-          value={nome}
-          onChangeText={setNome}
-          placeholder="Ex: João da Silva"
-          placeholderTextColor="#4b5563"
-          className="w-full bg-zinc-900 text-white rounded-xl px-4 py-4 text-sm"
-        />
+        <View className="items-center mb-8">
+          <Text className="text-3xl font-bold text-black dark:text-white mb-2">Criar Conta</Text>
+          <Text className="text-gray-500 dark:text-gray-400 text-sm">Preencha seus dados</Text>
+        </View>
+
+        <View className="mb-4">
+          <Text className="text-sm font-bold text-black dark:text-white mb-2">Nome Completo</Text>
+          <View className="relative justify-center">
+            <View className="absolute left-4 z-10">
+              <Feather name="user" size={20} color={isDark ? "#5BE096" : "#2E8B57"} />
+            </View>
+            <TextInput value={nome} onChangeText={setNome} placeholder="João da Silva" placeholderTextColor={isDark ? "#4b5563" : "#9CA3AF"} className={`w-full bg-white dark:bg-zinc-900 text-black dark:text-white border ${isDark ? 'border-[#5BE096]' : 'border-[#2E8B57]'} rounded-2xl pl-12 pr-4 py-4 text-base`} />
+          </View>
+        </View>
+
+        <View className="mb-4">
+          <Text className="text-sm font-bold text-black dark:text-white mb-2">E-mail</Text>
+          <View className="relative justify-center">
+            <View className="absolute left-4 z-10">
+              <Feather name="mail" size={20} color={isDark ? "#5BE096" : "#2E8B57"} />
+            </View>
+            <TextInput value={email} onChangeText={setEmail} placeholder="seu@email.com" placeholderTextColor={isDark ? "#4b5563" : "#9CA3AF"} keyboardType="email-address" autoCapitalize="none" className={`w-full bg-white dark:bg-zinc-900 text-black dark:text-white border ${isDark ? 'border-[#5BE096]' : 'border-[#2E8B57]'} rounded-2xl pl-12 pr-4 py-4 text-base`} />
+          </View>
+        </View>
+
+        <View className="mb-6">
+          <Text className="text-sm font-bold text-black dark:text-white mb-2">Senha</Text>
+          <View className="relative justify-center">
+            <View className="absolute left-4 z-10">
+              <Feather name="lock" size={20} color={isDark ? "#5BE096" : "#2E8B57"} />
+            </View>
+            <TextInput value={senha} onChangeText={setSenha} placeholder="Sua senha forte" placeholderTextColor={isDark ? "#4b5563" : "#9CA3AF"} secureTextEntry={!mostrarSenha} className={`w-full bg-white dark:bg-zinc-900 text-black dark:text-white border ${isDark ? 'border-[#5BE096]' : 'border-[#2E8B57]'} rounded-2xl pl-12 pr-12 py-4 text-base`} />
+            <TouchableOpacity className="absolute right-4 z-10 p-2" onPress={() => setMostrarSenha(!mostrarSenha)}>
+              <Feather name={mostrarSenha ? "eye-off" : "eye"} size={20} color={isDark ? "#5BE096" : "#2E8B57"} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 flex-row items-center mb-8">
+          <View className={`${isDark ? 'bg-[#5BE096]/10' : 'bg-[#2E8B57]/10'} p-3 rounded-full mr-4`}>
+            <Feather name="shield" size={24} color={isDark ? "#5BE096" : "#2E8B57"} />
+          </View>
+          <View className="flex-1">
+            <Text className={`${isDark ? 'text-[#5BE096]' : 'text-[#2E8B57]'} font-bold text-sm mb-1`}>Dica de segurança</Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-xs">Pelo menos 8 caracteres.</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity onPress={handleCadastro} disabled={isLoading} className={`w-full py-4 rounded-2xl items-center mb-6 ${isLoading ? 'bg-gray-300 dark:bg-zinc-700' : 'bg-[#5BE096]'}`} activeOpacity={0.8}>
+          {isLoading ? <ActivityIndicator color="#000000" /> : <Text className="text-black font-bold text-lg">Cadastrar</Text>}
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.back()} className="py-2 items-center">
+          <Text className="text-gray-600 dark:text-gray-400">Já tem uma conta? <Text className="text-[#5BE096] font-bold">Entrar</Text></Text>
+        </TouchableOpacity>
+
       </View>
-
-      <View className="mb-4">
-        <Text className="text-sm text-gray-400 mb-2">E-mail</Text>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="seu@email.com"
-          placeholderTextColor="#4b5563"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          className="w-full bg-zinc-900 text-white rounded-xl px-4 py-4 text-sm"
-        />
-      </View>
-
-      <View className="mb-8">
-        <Text className="text-sm text-gray-400 mb-2">Senha</Text>
-        <TextInput
-          value={senha}
-          onChangeText={setSenha}
-          placeholder="Crie uma senha forte"
-          placeholderTextColor="#4b5563"
-          secureTextEntry
-          className="w-full bg-zinc-900 text-white rounded-xl px-4 py-4 text-sm"
-        />
-      </View>
-
-      <TouchableOpacity
-        onPress={handleCadastro}
-        disabled={isLoading}
-        className={`w-full py-4 rounded-xl items-center ${isLoading ? 'bg-gray-500' : 'bg-[#5BE096]'}`}
-        activeOpacity={0.7}
-      >
-        {isLoading ? (
-          <ActivityIndicator color="#000" />
-        ) : (
-          <Text className="text-black font-bold text-lg">Cadastrar</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+    </BackgroundWrapper>
   );
 }
