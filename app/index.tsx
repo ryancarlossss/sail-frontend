@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, FontAwesome } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import BackgroundWrapper from '../components/BackgroundWrapper';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { cliente } from '../lib/api';
+import { usuariosService } from '../services';
+import { useEnvio } from '../hooks/useEnvio';
+import { validarEmail } from '../lib/validacao';
+import { foiCancelado, mensagemErro } from '../lib/erros';
+import Feedback from '../components/Feedback';
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
@@ -16,58 +20,46 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { enviando: isLoading, executar, estaAtivo } = useEnvio();
+  const [erro, setErro] = useState<string | null>(cliente.obterAvisoSessao());
 
   const handleLogin = async () => {
-    if (!email || !senha) {
-      Alert.alert('Erro', 'Preencha e-mail e senha.');
+    setErro(null);
+    if (!validarEmail(email) || !senha.trim() || senha.length > 255) {
+      setErro('Informe um e-mail válido e sua senha.');
       return;
     }
-
-    setIsLoading(true);
-    
     try {
-      const API_URL = 'http://192.168.0.104:8080/usuarios/login';
-      
-      const resposta = await axios.post(API_URL, {
-        email: email,
-        senha: senha
-      });
-
-      if (resposta.status === 200 || resposta.status === 202) {
-        const idDoUsuario = resposta.data.id; 
-        await AsyncStorage.setItem('usuarioId', idDoUsuario.toString());
-        
-        router.replace('/vendas');
-      }
-    } catch (error) {
-      Alert.alert('Acesso Negado', 'E-mail ou senha incorretos.');
-    } finally {
-      setIsLoading(false);
+      const resposta = await executar(signal => usuariosService.entrar({ email: email.trim(), senha }, signal));
+      if (resposta && estaAtivo()) cliente.definirSessao(resposta);
+    } catch (falha) {
+      if (estaAtivo() && !foiCancelado(falha)) setErro(mensagemErro(falha, 'login'));
     }
   };
 
   return (
     <BackgroundWrapper>
-      <View className="flex-1 px-6 justify-center" style={{ paddingTop: insets.top }}>
+      <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingTop: insets.top, paddingBottom: insets.bottom + 24 }}>
         <View className="items-center mb-10 mt-4">
           <Image source={require('../assets/images/logo-completa.png')} style={{ width: 220, height: 100 }} resizeMode="contain" className="mb-2" />
           <Text className="text-2xl font-bold text-black dark:text-white mb-1">Bem-vindo ao Sail</Text>
           <Text className="text-sm text-gray-500 dark:text-gray-400">Seu auxiliar inteligente de vendas</Text>
         </View>
 
+        <Feedback mensagem={erro} />
         <View className="mb-4 relative justify-center">
           <View className="absolute left-4 z-10">
             <Feather name="mail" size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
           </View>
-          <TextInput value={email} onChangeText={setEmail} placeholder="E-mail" placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"} keyboardType="email-address" autoCapitalize="none" className="w-full bg-white/90 dark:bg-zinc-900/90 text-black dark:text-white border border-gray-200 dark:border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-base" />
+          <TextInput editable={!isLoading} value={email} onChangeText={setEmail} placeholder="E-mail" placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"} keyboardType="email-address" autoCapitalize="none" className="w-full bg-white/90 dark:bg-zinc-900/90 text-black dark:text-white border border-gray-200 dark:border-zinc-800 rounded-2xl pl-12 pr-4 py-4 text-base" />
         </View>
 
         <View className="mb-8 relative justify-center">
           <View className="absolute left-4 z-10">
             <Feather name="lock" size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
           </View>
-          <TextInput value={senha} onChangeText={setSenha} placeholder="Senha" placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"} secureTextEntry={!mostrarSenha} className="w-full bg-white/90 dark:bg-zinc-900/90 text-black dark:text-white border border-gray-200 dark:border-zinc-800 rounded-2xl pl-12 pr-12 py-4 text-base" />
+          <TextInput editable={!isLoading} value={senha} onChangeText={setSenha} placeholder="Senha" placeholderTextColor={isDark ? "#9CA3AF" : "#6B7280"} secureTextEntry={!mostrarSenha} className="w-full bg-white/90 dark:bg-zinc-900/90 text-black dark:text-white border border-gray-200 dark:border-zinc-800 rounded-2xl pl-12 pr-12 py-4 text-base" />
           <TouchableOpacity className="absolute right-4 z-10 p-2" onPress={() => setMostrarSenha(!mostrarSenha)}>
             <Feather name={mostrarSenha ? "eye-off" : "eye"} size={20} color={isDark ? "#9CA3AF" : "#6B7280"} />
           </TouchableOpacity>
@@ -96,7 +88,8 @@ export default function LoginScreen() {
         <TouchableOpacity onPress={() => router.push('/cadastro')} className="py-2 items-center">
           <Text className="text-gray-600 dark:text-gray-400">Não tem conta? <Text className="text-[#5BE096] font-bold">Criar conta</Text></Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </BackgroundWrapper>
   );
 }

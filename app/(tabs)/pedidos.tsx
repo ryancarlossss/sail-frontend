@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, View, Text, TouchableOpacity, FlatList } from "react-native";
+import { ScrollView, View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/Badge";
