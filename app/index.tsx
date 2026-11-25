@@ -75,14 +75,14 @@ export default function LoginScreen() {
           <View className="flex-1 h-[1px] bg-gray-300 dark:bg-zinc-800" />
         </View>
 
-        <TouchableOpacity className="w-full py-4 mb-4 bg-transparent border border-[#5BE096] rounded-2xl flex-row justify-center items-center bg-white/50 dark:bg-black/50" activeOpacity={0.7}>
+        <TouchableOpacity disabled accessibilityState={{ disabled: true }} accessibilityLabel="Continuar com Google, em breve" className="w-full py-4 mb-4 bg-transparent border border-[#5BE096] rounded-2xl flex-row justify-center items-center bg-white/50 dark:bg-black/50 opacity-50" activeOpacity={0.7}>
           <FontAwesome name="google" size={18} color="#5BE096" className="mr-3" />
-          <Text className="text-[#5BE096] font-semibold ml-2">Continuar com Google</Text>
+          <Text className="text-[#5BE096] font-semibold ml-2">Google · Em breve</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="w-full py-4 mb-8 bg-transparent border border-[#5BE096] rounded-2xl flex-row justify-center items-center bg-white/50 dark:bg-black/50" activeOpacity={0.7}>
+        <TouchableOpacity disabled accessibilityState={{ disabled: true }} accessibilityLabel="Continuar com Facebook, em breve" className="w-full py-4 mb-8 bg-transparent border border-[#5BE096] rounded-2xl flex-row justify-center items-center bg-white/50 dark:bg-black/50 opacity-50" activeOpacity={0.7}>
           <FontAwesome name="facebook" size={18} color="#5BE096" className="mr-3" />
-          <Text className="text-[#5BE096] font-semibold ml-2">Continuar com Facebook</Text>
+          <Text className="text-[#5BE096] font-semibold ml-2">Facebook · Em breve</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/cadastro')} className="py-2 items-center">
